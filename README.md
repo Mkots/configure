@@ -54,3 +54,6 @@ make world
 | `zsh/.zshenv` | `~/.zshenv` |
 | `zsh/aliases.zsh` | `~/.oh-my-zsh/custom/aliases.zsh` |
 | `starship/starship.toml` | `~/.config/starship.toml` |
+
+
+GPG test
