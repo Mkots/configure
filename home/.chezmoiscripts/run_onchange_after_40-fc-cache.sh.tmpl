@@ -1,0 +1,7 @@
+{{ if ne .chezmoi.os "darwin" -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+# nerd-fonts release: {{ (gitHubLatestRelease "ryanoasis/nerd-fonts").TagName }}
+fc-cache -f "$HOME/.local/share/fonts/NerdFonts"
+{{- end }}

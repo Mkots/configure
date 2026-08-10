@@ -1,0 +1,14 @@
+[".oh-my-zsh"]
+    type = "git-repo"
+    url = "https://github.com/ohmyzsh/ohmyzsh.git"
+    refreshPeriod = "168h"
+
+{{ if eq .chezmoi.os "darwin" -}}
+["Library/Fonts/NerdFonts"]
+{{- else -}}
+[".local/share/fonts/NerdFonts"]
+{{- end }}
+    type = "archive"
+    url = "https://github.com/ryanoasis/nerd-fonts/releases/download/{{ (gitHubLatestRelease "ryanoasis/nerd-fonts").TagName }}/Iosevka.zip"
+    include = ["*.ttf"]
+    refreshPeriod = "720h"

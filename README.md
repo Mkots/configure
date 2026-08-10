@@ -1,6 +1,7 @@
 # dotfiles
 
-Portable shell configuration for macOS and Debian-based systems.
+Portable shell configuration for macOS and Debian-based systems, managed by
+[chezmoi](https://www.chezmoi.io/).
 
 ## Stack
 
@@ -30,43 +31,69 @@ Portable shell configuration for macOS and Debian-based systems.
 On a fresh system:
 
 ```sh
-# Install build tools and prerequisites
-bash premake.sh
-
-# Run full setup
-make world
+sh -c "$(curl -fsLS https://raw.githubusercontent.com/mkots/configure/main/bootstrap.sh)"
 ```
 
-`make world` will:
-1. Install zsh and set it as default shell
-2. Install oh-my-zsh
-3. Install mise
-4. Symlink configs (`~/.zshrc`, `~/.zshenv`, `~/.config/mise`, `~/.config/starship.toml`)
-5. Install all tools globally via mise
-6. Install Iosevka Nerd Font
+or, if you already cloned the repo:
 
-## Config files
+```sh
+./bootstrap.sh
+```
 
-| File | Symlinked to |
+This installs chezmoi (if not already present) and runs
+`chezmoi init --apply mkots/configure`, which:
+1. Runs the `.chezmoiscripts/` in order: apt packages / Xcode CLT, zsh install
+   + `chsh`, mise install, `mise install` (tool versions).
+2. Applies all managed dotfiles.
+3. Fetches externals (oh-my-zsh, Iosevka Nerd Font).
+
+## Who owns what
+
+- **chezmoi** owns bootstrap sequencing and every managed file — all
+  symlinking, platform branching, and external asset fetching is declarative.
+  Shell code only exists in `.chezmoiscripts/`, and only for steps that
+  mutate the system (apt, Xcode CLT, zsh install, `chsh`, mise install).
+- **mise** owns tool versions (`dot_config/mise/config.toml.tmpl`) and a
+  small set of maintenance tasks (`mise.toml` at the repo root), run after
+  the machine is already bootstrapped.
+
+## Repo layout
+
+```
+.
+├── .chezmoiroot          # contains: home
+├── bootstrap.sh          # installs chezmoi, then init --apply
+├── mise.toml             # repo maintenance tasks (diff/apply/lint/update/ci)
+└── home/                 # chezmoi source directory
+    ├── .chezmoiexternal.toml.tmpl   # oh-my-zsh, Iosevka Nerd Font
+    ├── .chezmoiscripts/             # apt/CLT, zsh, mise install, tool install
+    └── dot_config/, dot_zshenv, dot_zshrc, ...
+```
+
+## Maintenance tasks
+
+Run with `mise run <task>` from the repo root:
+
+| Task | What it does |
 |------|-------------|
-| `mise.toml` + `mise.lock` | `~/.config/mise/` |
-| `mise/<os>.toml` | `~/.config/mise/conf.d/platform.toml` |
-| `zsh/.zshrc` | `~/.zshrc` |
-| `zsh/.zshenv` | `~/.zshenv` |
-| `zsh/aliases.zsh` | `~/.oh-my-zsh/custom/aliases.zsh` |
-| `starship/starship.toml` | `~/.config/starship.toml` |
+| `diff` | Show what `chezmoi apply` would change in `$HOME` |
+| `apply` | Apply the chezmoi source state to `$HOME` |
+| `lint` | Shellcheck every rendered `.chezmoiscripts/` script |
+| `update` | `mise upgrade` → `mise lock` → `chezmoi re-add` the lockfile → `chezmoi apply` |
+| `ci` | `lint` + `chezmoi verify` |
 
 ## Platform differences
 
-Everything shared lives in `mise.toml`; per-OS tools live in `mise/linux.toml`
-and `mise/macos.toml`, linked into mise's `conf.d/`.
+Shared tool versions live in `home/dot_config/mise/config.toml.tmpl`; the
+only per-OS entry (`eza`) is templated with
+`{{ if eq .chezmoi.os "darwin" }}`.
 
 | | macOS | Debian |
 |---|---|---|
 | Prerequisites | Xcode Command Line Tools | `build-essential`, `curl`, `wget`, `git`, `unzip`, `fontconfig` |
 | zsh | preinstalled | `apt-get install zsh` |
 | eza | built from source (`cargo:eza`, ~2 min) — upstream ships no macOS binaries | prebuilt release binary |
-| Fonts | `~/Library/Fonts` | `~/.local/share/fonts/NerdFonts` + `fc-cache` |
+| Fonts | `~/Library/Fonts/NerdFonts` | `~/.local/share/fonts/NerdFonts` + `fc-cache` |
 
-On macOS `premake.sh` only needs the Command Line Tools; Homebrew is optional
-and is used solely to install `wget` if it happens to be present.
+On macOS, the prerequisites script only checks for the Command Line Tools;
+there is no Homebrew dependency.

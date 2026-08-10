@@ -1,0 +1,71 @@
+name: bootstrap
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install chezmoi, mise, shellcheck
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y shellcheck
+          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+          curl -fsSL https://mise.run | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: mise run lint
+        run: mise run lint
+
+  bootstrap:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:stable-slim
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install base prerequisites and a non-root sudo user
+        run: |
+          apt-get update -y
+          apt-get install -y sudo curl git ca-certificates
+          useradd -m -s /bin/bash runner
+          echo "runner ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/runner
+          cp -r "$GITHUB_WORKSPACE" /home/runner/dotfiles
+          chown -R runner:runner /home/runner/dotfiles
+
+      - name: Run bootstrap.sh as a non-root user
+        run: |
+          su - runner -c '
+            set -e
+            export DOTFILES_REPO="$HOME/dotfiles"
+            export PATH="$HOME/.local/bin:$PATH"
+            bash "$HOME/dotfiles/bootstrap.sh"
+          '
+
+      - name: Assert the bootstrap actually worked
+        run: |
+          su - runner -c '
+            set -e
+            export PATH="$HOME/.local/bin:$PATH"
+            zsh --version
+            mise ls
+            fc-list | grep -qi "Iosevka Nerd Font"
+            test -d "$HOME/.oh-my-zsh"
+            chezmoi verify
+          '
+
+      - name: Second apply proves idempotency
+        run: |
+          su - runner -c '
+            set -e
+            export PATH="$HOME/.local/bin:$PATH"
+            output="$(chezmoi apply -v)"
+            if [ -n "$output" ]; then
+              echo "second apply was not a no-op:"
+              echo "$output"
+              exit 1
+            fi
+            chezmoi verify
+          '
