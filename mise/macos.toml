@@ -1,0 +1,6 @@
+# macOS-only mise tools, linked into ~/.config/mise/conf.d/platform.toml
+
+[tools]
+# eza publishes Linux/Windows binaries only, so build it from source here.
+# Takes ~2 min and needs cargo, so install/tools.sh installs rust first.
+"cargo:eza" = "0.23.4"

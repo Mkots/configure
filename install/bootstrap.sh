@@ -2,6 +2,11 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib.sh"
+
+require_supported_os
+
+echo "==> Platform: $OS ($(uname -m))"
 
 echo "==> Installing zsh"
 bash "$SCRIPT_DIR/zsh.sh"
@@ -12,7 +17,7 @@ bash "$SCRIPT_DIR/oh-my-zsh.sh"
 echo "==> Installing mise"
 bash "$SCRIPT_DIR/mise.sh"
 
-echo "==> Linking mise config"
+echo "==> Linking configs"
 bash "$SCRIPT_DIR/link.sh"
 
 echo "==> Installing tools"
