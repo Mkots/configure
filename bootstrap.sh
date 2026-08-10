@@ -14,10 +14,16 @@ if [ -z "$CHEZMOI" ]; then
     CHEZMOI="$BIN_DIR/chezmoi"
 fi
 
-echo "Running chezmoi init --apply $REPO..."
-# --force: overwrite files that changed since chezmoi last wrote them
-# (e.g. mise.lock updated by `mise install` on a prior run).
-"$CHEZMOI" init --apply --force "$REPO"
+# If the script lives inside the repo (has a sibling .chezmoiroot), use the
+# local checkout as the source — no GitHub download needed.
+SCRIPT_DIR="$(cd "$(dirname "$0")" 2>/dev/null && pwd || true)"
+if [ -f "$SCRIPT_DIR/.chezmoiroot" ]; then
+    echo "Using local repo: $SCRIPT_DIR"
+    "$CHEZMOI" init --apply --force --source "$SCRIPT_DIR"
+else
+    echo "Running chezmoi init --apply $REPO..."
+    "$CHEZMOI" init --apply --force "$REPO"
+fi
 
 echo ""
 echo "Bootstrap complete. Restart your shell or run: exec zsh"
