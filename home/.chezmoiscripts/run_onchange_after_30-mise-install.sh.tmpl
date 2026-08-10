@@ -10,3 +10,8 @@ echo "Installing rust toolchain (needed to build eza)..."
 mise install rust
 {{ end -}}
 mise install
+
+# mise install may update mise.lock (resolved versions, checksums).
+# Re-add it so chezmoi's state database matches disk and won't flag it
+# as "externally modified" on the next apply.
+chezmoi re-add "$HOME/.config/mise/mise.lock"

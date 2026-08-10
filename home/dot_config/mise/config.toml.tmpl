@@ -11,12 +11,10 @@ node = "lts"
 rust = "latest"
 fzf = "0.71.0"
 ripgrep = "15.1.0"
-fd = "10.4.2"
 {{- if eq .chezmoi.os "darwin" }}
-# eza publishes Linux/Windows binaries only, so build it from source here.
-# Takes ~2 min and needs cargo, so the mise-install script installs rust first.
 "cargo:eza" = "0.23.4"
 {{- else }}
 # prebuilt binary from the eza-community releases
 eza = "0.23.4"
 {{- end }}
+fd = "10.4.2"
