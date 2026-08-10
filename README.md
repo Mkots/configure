@@ -1,6 +1,6 @@
 # dotfiles
 
-Portable shell configuration for Debian-based systems.
+Portable shell configuration for macOS and Debian-based systems.
 
 ## Stack
 
@@ -50,7 +50,23 @@ make world
 | File | Symlinked to |
 |------|-------------|
 | `mise.toml` + `mise.lock` | `~/.config/mise/` |
+| `mise/<os>.toml` | `~/.config/mise/conf.d/platform.toml` |
 | `zsh/.zshrc` | `~/.zshrc` |
 | `zsh/.zshenv` | `~/.zshenv` |
 | `zsh/aliases.zsh` | `~/.oh-my-zsh/custom/aliases.zsh` |
 | `starship/starship.toml` | `~/.config/starship.toml` |
+
+## Platform differences
+
+Everything shared lives in `mise.toml`; per-OS tools live in `mise/linux.toml`
+and `mise/macos.toml`, linked into mise's `conf.d/`.
+
+| | macOS | Debian |
+|---|---|---|
+| Prerequisites | Xcode Command Line Tools | `build-essential`, `curl`, `wget`, `git`, `unzip`, `fontconfig` |
+| zsh | preinstalled | `apt-get install zsh` |
+| eza | built from source (`cargo:eza`, ~2 min) — upstream ships no macOS binaries | prebuilt release binary |
+| Fonts | `~/Library/Fonts` | `~/.local/share/fonts/NerdFonts` + `fc-cache` |
+
+On macOS `premake.sh` only needs the Command Line Tools; Homebrew is optional
+and is used solely to install `wget` if it happens to be present.
