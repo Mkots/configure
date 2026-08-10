@@ -1,32 +1,47 @@
+# Tools needed to maintain this repo, not to configure a machine. Machine tools
+# live in home/dot_config/mise/config.toml.
+[tools]
+shellcheck = "0.11.0"
+
+# Every task passes --source . on purpose. Without it chezmoi falls back to
+# ~/.local/share/chezmoi, so a second clone on the machine would silently make
+# these tasks operate on the wrong source state.
+
 [tasks.diff]
 description = "Show what chezmoi apply would change in $HOME"
-run = "chezmoi diff"
+run = "chezmoi --source . diff"
 
 [tasks.apply]
 description = "Apply the chezmoi source state to $HOME"
-run = "chezmoi apply"
+run = "chezmoi --source . apply"
 
 [tasks.lint]
-description = "Shellcheck every rendered chezmoiscript"
+description = "Shellcheck every chezmoiscript, templated or not"
 run = '''
-for f in home/.chezmoiscripts/*; do
-    rendered="$(chezmoi --source . execute-template < "$f")"
-    if [ -n "$rendered" ]; then
-        echo "$rendered" | shellcheck -
-    fi
+set -eu
+for f in home/.chezmoiscripts/*.sh; do
+    shellcheck "$f"
+done
+for f in home/.chezmoiscripts/*.sh.tmpl; do
+    chezmoi --source . execute-template < "$f" | shellcheck -
 done
 '''
 
 [tasks.update]
-description = "Upgrade tools, refresh the mise lockfile, and re-apply"
+description = "Bump tool versions, refresh the shared lockfile, and re-apply"
+# `mise lock` defaults to the project config root — from this repo that is the
+# task file above, which declares only shellcheck. --global is what reaches the
+# real config. The lockfile needs no re-add: ~/.config/mise/mise.lock is a
+# symlink into state/, so mise writes straight into the repo.
 run = [
-    "mise upgrade",
-    "mise lock",
-    "chezmoi re-add ~/.config/mise/mise.lock",
-    "chezmoi apply",
+    "mise upgrade --bump",
+    "chezmoi --source . re-add ~/.config/mise/config.toml",
+    "mise lock --global",
+    "mise install",
+    "chezmoi --source . apply",
 ]
 
-[tasks.ci]
-description = "Everything CI runs: lint plus a verify that the source state is fully applied"
+[tasks.check]
+description = "Lint the scripts and verify $HOME matches the source state"
 depends = ["lint"]
-run = "chezmoi verify"
+run = "chezmoi --source . verify"

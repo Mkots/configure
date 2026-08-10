@@ -1,7 +1,10 @@
-{{ if ne .chezmoi.os "darwin" -}}
 #!/usr/bin/env bash
 set -euo pipefail
 
-# nerd-fonts release: {{ (gitHubLatestRelease "ryanoasis/nerd-fonts").TagName }}
-fc-cache -f "$HOME/.local/share/fonts/NerdFonts"
-{{- end }}
+# Re-runs when the pinned font release changes.
+# nerd-fonts release: {{ .versions.nerdFonts }}
+
+# macOS picks up fonts from ~/Library/Fonts without a cache rebuild.
+[ "$(uname -s)" = "Linux" ] || exit 0
+
+fc-cache -f "$HOME/{{ .fontDir.linux }}"

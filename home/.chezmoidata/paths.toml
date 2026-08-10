@@ -1,0 +1,6 @@
+# Where Nerd Fonts land, per OS. Defined once and read by both
+# .chezmoiexternal.toml.tmpl and run_onchange_after_40-fc-cache.sh.tmpl,
+# so the two can never disagree. Paths are relative to $HOME.
+[fontDir]
+darwin = "Library/Fonts/NerdFonts"
+linux = ".local/share/fonts/NerdFonts"

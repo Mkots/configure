@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-{{ if eq .chezmoi.os "linux" -}}
-sudo apt-get update -y
-sudo apt-get install -y zsh
-{{ end -}}
+if [ "$(uname -s)" = "Linux" ]; then
+    sudo apt-get update -y
+    sudo apt-get install -y zsh
+fi
+
 ZSH_BIN="$(command -v zsh)"
 
 if [ "${SHELL:-}" != "$ZSH_BIN" ]; then

@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# config hash: {{ include "dot_config/mise/config.toml.tmpl" | sha256sum }}
+# config hash: {{ include "dot_config/mise/config.toml" | sha256sum }}
 
 export PATH="$HOME/.local/bin:$PATH"
 
-{{ if eq .chezmoi.os "darwin" -}}
-echo "Installing rust toolchain (needed to build eza)..."
-mise install rust
-{{ end -}}
 mise install

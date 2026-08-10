@@ -15,16 +15,15 @@ if [ -z "$CHEZMOI" ]; then
     CHEZMOI="$BIN_DIR/chezmoi"
 fi
 
-# Authenticate GitHub API calls (used by chezmoi templates like gitHubLatestRelease).
-if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
-    GITHUB_TOKEN="$(gh auth token)"
-    export GITHUB_TOKEN
-fi
-
 # Running from inside the local clone — use it directly, no download needed.
 SCRIPT_DIR="$(cd "$(dirname "$0")" 2>/dev/null && pwd || true)"
 if [ -f "$SCRIPT_DIR/.chezmoiroot" ]; then
     echo "Using local repo: $SCRIPT_DIR"
+    # --source is per-invocation only; without pinning it in the config file a
+    # bare `chezmoi apply` would fall back to ~/.local/share/chezmoi and quietly
+    # act on a different clone.
+    mkdir -p "$HOME/.config/chezmoi"
+    printf 'sourceDir = "%s"\n' "$SCRIPT_DIR" > "$HOME/.config/chezmoi/chezmoi.toml"
     "$CHEZMOI" init --apply --force --source "$SCRIPT_DIR"
 
 # gh is authenticated — clone/pull via gh to avoid unauthenticated rate limits.

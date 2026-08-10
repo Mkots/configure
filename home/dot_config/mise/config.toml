@@ -1,0 +1,15 @@
+[settings]
+lockfile = true
+
+[tools]
+fastfetch = "2.61.0"
+# 10.4+ ships no x86_64-apple-darwin build, and one lockfile is shared by all
+# machines — so every machine stays on the last version the Intel Mac can use.
+fd = "10.3.0"
+fzf = "0.71.0"
+gh = "2.89.0"
+lsd = "1.2.0"
+neovim = "0.12 .0"
+ripgrep = "15.1.0"
+starship = "1.24.2"
+zoxide = "0.9.9"

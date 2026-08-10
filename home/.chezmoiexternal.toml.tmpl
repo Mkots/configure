@@ -2,13 +2,13 @@
     type = "git-repo"
     url = "https://github.com/ohmyzsh/ohmyzsh.git"
     refreshPeriod = "168h"
+    [".oh-my-zsh".clone]
+        args = ["--depth=1"]
+    [".oh-my-zsh".pull]
+        args = ["--ff-only"]
 
-{{ if eq .chezmoi.os "darwin" -}}
-["Library/Fonts/NerdFonts"]
-{{- else -}}
-[".local/share/fonts/NerdFonts"]
-{{- end }}
+["{{ index .fontDir .chezmoi.os }}"]
     type = "archive"
-    url = "https://github.com/ryanoasis/nerd-fonts/releases/download/{{ (gitHubLatestRelease "ryanoasis/nerd-fonts").TagName }}/Iosevka.zip"
+    url = "https://github.com/ryanoasis/nerd-fonts/releases/download/{{ .versions.nerdFonts }}/Iosevka.zip"
     include = ["*.ttf"]
     refreshPeriod = "720h"

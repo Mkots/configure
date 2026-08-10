@@ -1,0 +1,5 @@
+# Pinned versions for things chezmoi fetches directly (not managed by mise).
+# Bumping one of these is a deliberate commit, not a side effect of running
+# `chezmoi apply` — templates must never reach the network to decide a version.
+[versions]
+nerdFonts = "v3.5.0"
