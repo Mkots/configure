@@ -1,16 +1,32 @@
-[settings]
-lockfile = true
+[tasks.diff]
+description = "Show what chezmoi apply would change in $HOME"
+run = "chezmoi diff"
 
-# eza lives in mise/{linux,macos}.toml: upstream ships no macOS binaries,
-# so it is built from source there (see install/link.sh)
-[tools]
-neovim = "0.12.0"
-zoxide = "0.9.9"
-fastfetch = "2.61.0"
-gh = "2.89.0"
-starship = "1.24.2"
-node = "lts"
-rust = "latest"
-fzf = "0.71.0"
-ripgrep = "15.1.0"
-fd = "10.4.2"
+[tasks.apply]
+description = "Apply the chezmoi source state to $HOME"
+run = "chezmoi apply"
+
+[tasks.lint]
+description = "Shellcheck every rendered chezmoiscript"
+run = '''
+for f in home/.chezmoiscripts/*; do
+    rendered="$(chezmoi --source . execute-template < "$f")"
+    if [ -n "$rendered" ]; then
+        echo "$rendered" | shellcheck -
+    fi
+done
+'''
+
+[tasks.update]
+description = "Upgrade tools, refresh the mise lockfile, and re-apply"
+run = [
+    "mise upgrade",
+    "mise lock",
+    "chezmoi re-add ~/.config/mise/mise.lock",
+    "chezmoi apply",
+]
+
+[tasks.ci]
+description = "Everything CI runs: lint plus a verify that the source state is fully applied"
+depends = ["lint"]
+run = "chezmoi verify"

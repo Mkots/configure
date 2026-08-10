@@ -1,5 +1,0 @@
-# Linux-only mise tools, linked into ~/.config/mise/conf.d/platform.toml
-
-[tools]
-# prebuilt binary from the eza-community releases
-eza = "0.23.4"
