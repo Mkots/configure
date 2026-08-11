@@ -10,6 +10,7 @@ plugins=(
     starship
     ssh
     zoxide
+    zsh-autosuggestions
 )
 
 source $ZSH/oh-my-zsh.sh
